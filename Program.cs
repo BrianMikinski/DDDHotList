@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace DDDHotList
 {
@@ -14,12 +15,13 @@ namespace DDDHotList
              * property getter and setter strategies as opposed to good inheritance practices.
              */
 
-             // dirty house with open, public setters
+            // dirty house with open, public setters
             Console.WriteLine("Dirty House:");
-            var dump = new DirtyHouse(){
+            var dump = new DirtyHouse()
+            {
                 Windows = 12,
                 Doors = 5,
-                Color = "Black" 
+                Color = "Black"
             };
 
             Console.WriteLine($"    Color: {dump.Color}");
@@ -38,7 +40,7 @@ namespace DDDHotList
             Console.WriteLine($"    Color: {cleanHouse.Color}");
 
             // Mansion with pool
-           
+
             var mansionWithPool = Mansion.withPool(27, 19, "Tope");
             mansionWithPool.ShowHouse();
 
@@ -55,8 +57,8 @@ namespace DDDHotList
         /// </summary>
         public class DirtyHouse
         {
-            public int Windows  { get; set; }
-            
+            public int Windows { get; set; }
+
             public int Doors { get; set; }
 
             public string Color { get; set; }
@@ -67,7 +69,7 @@ namespace DDDHotList
         /// 
         /// Note: Notice the private setter methods. Private setters are 
         /// a significant design improvement over fully open setter methods. If you need to
-        /// Access a method sparingly, use custom setter functions. Only make the setter propery 
+        /// Access a method sparingly, use custom setter functions. Only make the setter property 
         /// public as a last resort.
         /// 
         /// Note: Because the properties have private setters, you must construct the object
@@ -82,19 +84,20 @@ namespace DDDHotList
                 Color = color;
             }
 
-            public int Windows {get; private set;}
+            public int Windows { get; private set; }
 
             /// <summary>
             /// Customer setter method for setting the number of windows in the house
             /// </summary>
             /// <param name="windows"></param>
-            public void SetWindows(int windows){
+            public void SetWindows(int windows)
+            {
                 Windows = windows;
             }
 
-            public int Doors {get; private set;}
+            public int Doors { get; private set; }
 
-            public string Color {get; private set;}
+            public string Color { get; private set; }
         }
 
         /// <summary>
@@ -110,7 +113,7 @@ namespace DDDHotList
             {
                 Windows = windows;
                 Doors = doors;
-                Color = color;    
+                Color = color;
             }
 
             public readonly int Windows;
@@ -127,7 +130,7 @@ namespace DDDHotList
         /// of certain types of objects. This is combined with private constructors as a powerful technique
         /// to insure your objects are created correctly and safely
         /// </summary>
-        public class Mansion 
+        public class Mansion
         {
             /// <summary>
             /// Create a new mansion with a pool
@@ -153,12 +156,13 @@ namespace DDDHotList
                 return new Mansion(windows, doors, color);
             }
 
-            private Mansion(int windows, int doors, string color, bool hasPool = false)
+            private Mansion(int windows, int doors, string color, bool hasPool = false, IEnumerable<string> roomNames = null)
             {
                 Windows = windows;
                 Doors = doors;
                 Color = color;
-                HasPool = hasPool;  
+                HasPool = hasPool;
+                RoomNames = roomNames;
             }
 
             /// <summary>
@@ -170,6 +174,12 @@ namespace DDDHotList
                 return new CleanHouse(Windows, Doors, Color);
             }
 
+            /// <summary>
+            /// Use of IEnumerable means that object cannot be modofied inadvertantly by typical add/delete/sort/
+            /// collection operations but still allows object to be iterated over in an foreach loop
+            /// </summary>
+            public readonly IEnumerable<string> RoomNames;
+
             public readonly int Windows;
 
             public readonly int Doors;
@@ -180,7 +190,7 @@ namespace DDDHotList
 
             public void ShowHouse()
             {
-                if(HasPool)
+                if (HasPool)
                 {
                     Console.WriteLine("Mansion with Pool:");
                 }
@@ -195,9 +205,28 @@ namespace DDDHotList
             }
         }
 
-        public class Vehicle
+        /// <summary>
+        /// Sport Utility Vehicle
+        /// </summary>
+        public class SportUtilityVehicle : MotorVehicle
         {
+            public SportUtilityVehicle(string model, string make, int firstGearSpeed, int secondGearSpeed) 
+            : base(firstGearSpeed, secondGearSpeed)
+            {
+                Model = model;
+                Make = make;
+            }
 
+            public override void TestDrive()
+            {
+               var speed = PowerTrain.TransferEnergy(800);
+
+               PrintSpeed(speed);
+
+               speed = PowerTrain.TransferEnergy(1200);
+
+               PrintSpeed(speed);
+            }
         }
 
         /// <summary>
@@ -205,7 +234,61 @@ namespace DDDHotList
         /// </summary>
         public abstract class MotorVehicle
         {
-        
+            protected readonly Transmission PowerTrain;
+
+            public readonly string Model;
+
+            public readonly string Make;
+
+            public MotorVehicle(int firstGearSpeed, int secondGearSpeed)
+            {
+                PowerTrain = new Transmission( firstGearSpeed, secondGearSpeed);
+            }
+
+            public abstract void TestDrive();
+
+            /// <summary>
+            /// Print the speed of the vehicle
+            /// </summary>
+            /// <param name="speed"></param>
+            protected void PrintSpeed(int speed)
+            {
+                Console.WriteLine($"{Model} {Make} driving at a current speed of {speed}");
+            }
+
+            /// <summary>
+            /// Object modeling the transmission of a motor vehicle
+            /// </summary>
+            protected class Transmission
+            {
+                private readonly int _firstGearSpeed;
+                private readonly int _secondGearSpeed;
+
+                public Transmission(int firstGearSpeed, int secondGearSpeed)
+                {
+                    _firstGearSpeed = firstGearSpeed;
+                    _secondGearSpeed = secondGearSpeed;
+                }
+
+                /// <summary>
+                /// Adjust the speed of the care based on the engine rpms
+                /// </summary>
+                /// <param name="engineRpms"></param>
+                /// <returns></returns>
+                public int TransferEnergy(int engineRpms)
+                {
+                    if (engineRpms <= 1000)
+                    {
+                        return _firstGearSpeed;
+                    }
+                    else if (engineRpms > 1000)
+                    {
+                        return _secondGearSpeed;
+                    }
+
+                    return _firstGearSpeed;
+                }
+            }
         }
     }
 }
