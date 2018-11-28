@@ -7,7 +7,6 @@ namespace DDDHotList
     {
         static void Main(string[] args)
         {
-
             /**
              * Ideally for the "house" set of classes, we would use a type of inheritance structure
              * to share code writing the house name, color, windows, doors, etc to the console.
@@ -46,6 +45,10 @@ namespace DDDHotList
 
             var mansionWithoutPool = Mansion.withoutPool(33, 23, "Purple");
             mansionWithoutPool.ShowHouse();
+
+            var fordExplorer = new SportUtilityVehicle("Ford", "Explorer", 1000, 2000);
+
+            fordExplorer.TestDrive();
         }
 
         /// <summary>
@@ -175,7 +178,7 @@ namespace DDDHotList
             }
 
             /// <summary>
-            /// Use of IEnumerable means that object cannot be modofied inadvertantly by typical add/delete/sort/
+            /// Use of IEnumerable means that object cannot be modofied inadvertantly by typical add/delete/sort
             /// collection operations but still allows object to be iterated over in an foreach loop
             /// </summary>
             public readonly IEnumerable<string> RoomNames;
@@ -210,22 +213,21 @@ namespace DDDHotList
         /// </summary>
         public class SportUtilityVehicle : MotorVehicle
         {
-            public SportUtilityVehicle(string model, string make, int firstGearSpeed, int secondGearSpeed) 
-            : base(firstGearSpeed, secondGearSpeed)
+            public SportUtilityVehicle(string make, string model, int firstGearRpms, int secondGearRpms)
+            : base(make, model, firstGearRpms, secondGearRpms)
             {
-                Model = model;
-                Make = make;
+
             }
 
             public override void TestDrive()
             {
-               var speed = PowerTrain.TransferEnergy(800);
+                var speed = PowerTrain.TransferEnergy(800);
 
-               PrintSpeed(speed);
+                PrintSpeed(speed);
 
-               speed = PowerTrain.TransferEnergy(1200);
+                speed = PowerTrain.TransferEnergy(1200);
 
-               PrintSpeed(speed);
+                PrintSpeed(speed);
             }
         }
 
@@ -240,9 +242,11 @@ namespace DDDHotList
 
             public readonly string Make;
 
-            public MotorVehicle(int firstGearSpeed, int secondGearSpeed)
+            public MotorVehicle(string make, string model, int firstGearRpms, int secondGearRpms)
             {
-                PowerTrain = new Transmission( firstGearSpeed, secondGearSpeed);
+                Make = make;
+                Model = model;
+                PowerTrain = new Transmission(firstGearRpms, secondGearRpms);
             }
 
             public abstract void TestDrive();
@@ -253,40 +257,84 @@ namespace DDDHotList
             /// <param name="speed"></param>
             protected void PrintSpeed(int speed)
             {
-                Console.WriteLine($"{Model} {Make} driving at a current speed of {speed}");
+                Console.WriteLine($"{Make} {Model}: Driving at a current speed of {speed} mph");
             }
 
             /// <summary>
-            /// Object modeling the transmission of a motor vehicle
+            /// Class modeling the transmission of a motor vehicle
             /// </summary>
             protected class Transmission
             {
-                private readonly int _firstGearSpeed;
-                private readonly int _secondGearSpeed;
+                private readonly Gear _firstGear;
 
-                public Transmission(int firstGearSpeed, int secondGearSpeed)
+                private readonly Gear _secondGear;
+
+                public Transmission(int firstGearRpms, int secondGearRpms)
                 {
-                    _firstGearSpeed = firstGearSpeed;
-                    _secondGearSpeed = secondGearSpeed;
+                    _firstGear = new Gear(100, firstGearRpms, 10);
+                    _secondGear = new Gear(firstGearRpms + 1, secondGearRpms, 30);
                 }
 
                 /// <summary>
-                /// Adjust the speed of the care based on the engine rpms
+                /// Adjust the speed of the car based on the engine rpms
                 /// </summary>
                 /// <param name="engineRpms"></param>
                 /// <returns></returns>
                 public int TransferEnergy(int engineRpms)
                 {
-                    if (engineRpms <= 1000)
+                    if (_firstGear.isInRange(engineRpms))
                     {
-                        return _firstGearSpeed;
+                        return _firstGear.Speed;
                     }
-                    else if (engineRpms > 1000)
+                    else if (_secondGear.isInRange(engineRpms))
                     {
-                        return _secondGearSpeed;
+                        return _secondGear.Speed;
                     }
 
-                    return _firstGearSpeed;
+                    return 5;
+                }
+            }
+
+            /// <summary>
+            /// Private class to handle shifting. This class takes enginer rpms and 
+            /// </summary>
+            private class Gear
+            {
+                public Gear(int minRpms, int maxRpms, int speed)
+                {
+                    _minRpms = minRpms;
+                    _maxRpms = maxRpms;
+                    Speed = speed;
+                }
+
+                /// <summary>
+                /// The minimum number of rpms in this gear range
+                /// </summary>
+                private readonly int _minRpms;
+
+                /// <summary>
+                /// The maximum number of rpms in this gear range
+                /// </summary>
+                private readonly int _maxRpms;
+
+                /// <summary>
+                /// The speed produced by the gear
+                /// </summary>
+                public readonly int Speed;
+
+                /// <summary>
+                /// Determine if the gear is in range
+                /// </summary>
+                /// <param name="engineRpms"></param>
+                /// <returns></returns>
+                public bool isInRange(int engineRpms)
+                {
+                    if(engineRpms >= _minRpms && engineRpms <= _maxRpms)
+                    {
+                        return true;
+                    }
+
+                    return false;
                 }
             }
         }
