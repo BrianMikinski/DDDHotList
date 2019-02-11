@@ -55,7 +55,7 @@ namespace DDDHotList
         }
 
         /// <summary>
-        /// Use of IEnumerable means that object cannot be modofied inadvertantly by typical add/delete/sort
+        /// Use of IEnumerable means that object cannot be modofied inadvertently by typical add/delete/sort
         /// collection operations but still allows object to be iterated over in an foreach loop
         /// </summary>
         public readonly IEnumerable<string> RoomNames;

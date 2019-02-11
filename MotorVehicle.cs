@@ -68,7 +68,7 @@ namespace DDDHotList
         }
 
         /// <summary>
-        /// Private class to handle shifting. This class takes enginer rpms and 
+        /// Private class to handle shifting. This class takes engine rpms and 
         /// </summary>
         private class Gear
         {
